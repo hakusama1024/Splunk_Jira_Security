@@ -93,6 +93,8 @@ ENV/
 *.yaml
 *.csv
 
+config/
+
 #Editor 
 .idea
 */.idea
