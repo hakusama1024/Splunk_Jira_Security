@@ -1,0 +1,88 @@
+<dashboard>
+  <label>Security Matrics Dashboard</label>
+  <row>
+    <panel>
+      <title>Trending Total Defect Count Open By Month</title>
+      <table>
+        <search>
+          <query>index = "demo1" severity != null sdlc_phase !="closed"| eval _time=strptime(created,"%Y-%m-%dT%H:%M:%S.000+0000")  | bin _time span="1mon" | eval  n_status=lower('severity')  | eval  sort_field=case(n_status=="s0",1,n_status=="s1",2,n_status=="s2",3,n_status=="s3",4, n_status=="TOTAL", 5)| chart count by _time, severity |sort  _time desc | fields  - n_status sort_field  | addtotals</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <title>Trending Total Defect Closed Count By Month</title>
+      <table>
+        <search>
+          <query>index = "demo1" severity != null  sdlc_phase ="closed" | eval _time=strptime(created,"%Y-%m-%dT%H:%M:%S.000+0000")  | bin _time span="1mon" | eval  n_status=lower('severity')  | eval  sort_field=case(n_status=="s0",1,n_status=="s1",2,n_status=="s2",3,n_status=="s3",4, n_status=="TOTAL", 5)| chart count by _time, severity |sort  _time desc | fields  - n_status sort_field  | addtotals</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 10 by Defect Severity</title>
+      <table>
+        <search>
+          <query>index = "demo1" severity != null 
+ | chart count by  "product_name", "severity" |rename product_name as "Product Name"|eval Weight=(S0*1000000 + S1*10000 + S2*100 + S3*1) | sort 10 - Weight | fields - Weight</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Defect Opened in Past 30 Days</title>
+      <table>
+        <search>
+          <query>index = "demo1" severity != null  sdlc_phase ="New" earliest = -30d |`setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`| chart count by  "business_unit" , "severity"|rename business_unit as "Business Unit" |addtotals</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <title>Total Current Defect Count</title>
+      <table>
+        <search>
+          <query>index = "demo1" severity != null sdlc_phase != "Closed"|`setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`| chart count by  "business_unit" , "severity" |rename business_unit as "Business Unit"|addtotals</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <title>Severity Chart</title>
+      <chart>
+        <search>
+          <query>index = "demo1" severity != null sdlc_phase != "Closed"|`setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`| chart count by  "business_unit" , "severity"|rename business_unit as "Business Unit" |addtotals</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.fieldColors">{"S0":0xFF0066,"S1":0xF87217,"S2":0xFFFF00,"S3":0x66cc00}</option>
+        <option name="charting.chart.showPercent">true</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Open Findings</title>
+      <table>
+        <search>
+          <query>index = "demo1" severity != null | eval _time=strptime(created,"%Y-%m-%dT%H:%M:%S.000+0000")
+ | stats count by  summary, created, severity, age, product_name, link, business_unit, dev_owner, qe_owner 
+ | rename summary as "Summary", created as "Data", severity as "Severity", age as "Age", product_name as "Product Name", link as "Link", business_unit as "Business Unit", dev_owner as "Dev Owner", qe_owner as "QE Owner"
+ |sort 0 Severity, Age | fields - count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+</dashboard>
