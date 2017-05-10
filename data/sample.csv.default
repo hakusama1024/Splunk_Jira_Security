@@ -1,0 +1,5 @@
+Report Date,JIRA Project,Age,Normalized Status,Normalized Resolution,Issue Type,Key,Summary,Assignee,Priority,Status,Created,Resolution,Resolved,GET Severity Level,Root Cause,When Discovered,Reporter
+2016-08-25,SMP,0.74,Closed,Done,Bug,SMP-105,RAML should specify collection name in _embedded lists,Joe Racker,Unprioritized,Done,7/27/16 22:41,Done,7/28/16 16:25,L4,Implementation Error,Pre-Release,Joe Racker
+2016-08-25,SMP,27.57,Closed,Done,Bug,SMP-101,Pagination with markers,Joe Racker,Normal,Done,7/21/16 0:30,Done,8/17/16 14:14,L3,Implementation Error,Pre-Release,Joe Racker
+2016-08-25,SMP,2.88,Closed,Done,Bug,SMP-67,Fix entity updates,Joe Racker,Unprioritized,Done,6/28/16 22:15,Done,7/1/16 19:22,L2,Implementation Error,Pre-Release,Joe Racker
+2017-01-27,SMP,2.88,Closed,Done,Bug,SMP-67,Fix entity updates,Joe Racker,Unprioritized,Done,6/28/16 17:15,Dofne,7/1/16 14:22,L2,Implementation Error,Pre-Release,Joe Racker

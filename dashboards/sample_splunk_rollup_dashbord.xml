@@ -1,0 +1,106 @@
+<form>
+  <label>QE Defect Metrics v2 (Business Unit Level)</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="dropdown" token="bu_unit">
+      <default>*</default>
+      <label>Business Unit</label>
+      <choice value="*">All</choice>
+      <fieldForValue>business_unit</fieldForValue>
+      <search>
+        <query>(index="rax_temp_60" host="saac_dev_se_test")  | dedup business_unit | sort business_unit | top 10 business_unit | fields business_unit | table business_unit</query>
+      </search>
+      <fieldForLabel>business_unit</fieldForLabel>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Current In-Flight Defects By Project &amp; Severity</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test") AND (business_unit="$bu_unit$"  AND project_name="*") | dedup key | where 'sdlc_phase' != "Closed" | chart count by project_name, severity</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Project Name</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.fieldColors">{"S0":0xFF0000,"S1":0xF87217,"S2":0xFFFF00,"S3":0x009900, null: #808080}</option>
+        <option name="height">320</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Current In-Flight Defects By Project &amp; Defect Status</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test") AND (business_unit="$bu_unit$"  AND project_name="*") | dedup key | where 'sdlc_phase' != "Closed" | chart count by project_name, sdlc_phase</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Project Name</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.fieldColors">{"New":0xFF0000, "Analyze":0xF87217, "Develop":0xFFFF00, "Test": 0xFF00FF, "Deploy":0x0000FF}</option>
+        <option name="charting.legend.labels">[New,Analyze,Develop,Test,Deploy]</option>
+        <option name="height">334</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Defect Detection Trends By Product &amp; Severity</title>
+        <search>
+          <query>index="rax_temp_60" host="saac_dev_se_test" business_unit = "$bu_unit$" | dedup key | eval _time=strptime(created, "%Y-%m-%dT%H:%M:%S.000+0000") | where _time &gt; relative_time(now(),"-6mon@mon") | eval created_month= jira_project."    ".strftime(strptime(created, "%Y-%m-%dT%H:%M:%S.000+0000"), "%Y-%m")| chart count by created_month, severity</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
+        <option name="charting.axisLabelsX.majorLabelVisibility">show</option>
+        <option name="charting.axisLabelsX.majorTickVisibility">show</option>
+        <option name="charting.axisTitleX.text">Month (by Project)</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.fieldColors">{"S0":0xFF0000,"S1":0xF87217,"S2":0xFFFF00,"S3":0x009900, null: #808080}</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Defect Closure Trends By Product &amp; Severity</title>
+        <search>
+          <query>index="rax_temp_60" host="saac_dev_se_test" business_unit = "$bu_unit$" | dedup key | eval _time=strptime(created, "%Y-%m-%dT%H:%M:%S.000+0000") | where _time &gt; relative_time(now(),"-6mon@mon") | eval resolved_month= jira_project."    ".strftime(strptime(resolved, "%Y-%m-%dT%H:%M:%S.000+0000"), "%Y-%m")| chart count by resolved_month, severity</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
+        <option name="charting.axisTitleX.text">Month (by Project)</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.fieldColors">{"S0":0xFF0000,"S1":0xF87217,"S2":0xFFFF00,"S3":0x009900, null: #808080}</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Defect Detection Trends By Product &amp; When Detected</title>
+        <search>
+          <query>index="rax_temp_60" host="saac_dev_se_test" business_unit = "$bu_unit$" | dedup key | eval _time=strptime(created, "%Y-%m-%dT%H:%M:%S.000+0000") | where _time &gt; relative_time(now(),"-6mon@mon") | eval created_month= jira_project."   ".strftime(strptime(created, "%Y-%m-%dT%H:%M:%S.000+0000"), "%Y-%m")| chart count by created_month, when_detected</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
+        <option name="charting.axisTitleX.text">Month (by Project)</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.fieldColors">{"Component":0x009900, "Integration":0xFFFF00, "UAT":0xF87217, "Post-Release":0xFF0000}</option>
+        <option name="charting.legend.labels">[Component,Integration,UAT,Post-Release]</option>
+      </chart>
+    </panel>
+  </row>
+</form>

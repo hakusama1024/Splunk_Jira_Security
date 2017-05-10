@@ -1,0 +1,25 @@
+---
+### Sets up splunk-jira tasks
+
+- name: Get SAAC Index and Token
+  delegate_to: 127.0.0.1
+  get_password: "{{ pws_id }}.{{ saac_pws }}"
+  register: saac_creds
+
+- name: Get QE Index and Token
+  delegate_to: 127.0.0.1
+  get_password: "{{ pws_id }}.{{ qe_pws }}"
+  register: qe_creds
+
+- name: Get JIRA Credentials
+  delegate_to: 127.0.0.1
+  get_password: "{{ pws_id }}.{{ jira_pws }}"
+  register: jira_creds
+
+- name: Create config.yaml
+  template:
+    src: config.yaml.j2
+    dest: /var/lib/jenkins/jobs/splunk-jira/workspace/config/config.yaml
+    owner: jenkins
+    group: jenkins
+    mode: 0644

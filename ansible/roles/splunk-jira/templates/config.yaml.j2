@@ -1,0 +1,155 @@
+--- 
+environment: {{ app_environment }}
+splunk: 
+  local: 
+    host: "https://localhost:8088/services/collector"
+    token: <changeme>
+    index: <changeme>
+    splunk_host: qe_metrics
+    payload_limit: null
+  saac: 
+    host: "https://httpc.secops.rackspace.com:8088/services/collector"
+    token: {{ saac_creds['password'] }}
+    index: {{ saac_creds['username'] }}
+    splunk_host: qe_metrics
+    payload_limit: 900000
+  qe:
+    host: "https://10.14.212.230:8088/services/collector"
+    token: {{ qe_creds['password'] }}
+    index: {{ qe_creds['username'] }}
+    splunk_host: qe_metrics
+    payload_limit: null
+
+jira:
+  host: "https://jira.rax.io"
+  username: {{ jira_creds['username'] }}
+  password: {{ jira_creds['password'] }}
+  project_mapping:
+    Security Engineering:
+      - SE
+  status_mapping:
+    Deploy:
+      - "ready for prod"
+      - "prod uat"
+      - "ready for release"
+      - "ready for production"
+      - "ready for deploy"
+      - "ready for deployment"
+      - releasing
+      - "prod ready"
+      - "qe approved"
+      - deployed
+    Closed:
+      - accepted
+      - cancelled
+      - closed
+      - "closed: rejected"
+      - communicated
+      - done
+      - "done (pushed to prod)"
+      - "in production"
+      - "on hold"
+      - resolved
+      - released
+      - "release failure"
+      - rejected
+      - archived
+      - "in prod"
+      - "research done"
+    New:
+      - backlog
+      - open
+      - "not yet started"
+      - "on deck"
+      - "new request"
+      - "ready for dev"
+      - "new"
+      - intake
+    Analyze:
+      - "in analysis"
+      - "in proritization"
+      - "in prioritization"
+      - analysis
+      - "development approval"
+      - "ready for development"
+      - "ready to work"
+      - "ready"
+      - icebox
+      - design
+      - "need vetting"
+      - reopend
+      - reopened
+      - "to  do"
+      - "to do"
+    Develop:
+      - "in development"
+      - "in progress"
+      - "in review"
+      - in_review
+      - "code review"
+      - "peer review"
+      - "dba review"
+      - blocked
+      - "resolving review findings - dba"
+      - "manager approval"
+      - "ready to merge"
+      - finished
+      - started
+      - review
+      - hold
+      - "ready for pr"
+      - "ready for pr2"
+      - "in peer review"
+      - "rf staging"
+      - "dev re-work"
+      - "in pr1"
+      - "in pr2"
+      - "bse ready"
+      - "peer review 2"
+      - doing
+      - "pending review"
+      - "pending jeremy"
+      - "ready for pr1"
+      - "dev - in progress"
+      - "ready for peer review"
+      - active
+      - blocked
+    Test:
+      - "user acceptance testing"
+      - "resolving review findings -uat"
+      - "dev test"
+      - "dev done"
+      - "integration testing"
+      - "test implementation"
+      - "resolving review findings - integration testing - qa"
+      - "staging deploy/pending qe"
+      - reviewed
+      - "in qe"
+      - "pending prod validation"
+      - "ready for staging"
+      - "pr merged"
+      - "dev complete"
+      - delivered
+      - "pending release"
+      - "ready for qe testing"
+      - "code complete/merged"
+      - merged
+      - "in staging"
+      - "staging"
+      - "ready for uat"
+      - "in uat"
+      - "ready for testing"
+      - "staging qe"
+      - qe
+      - "ready for qe"
+      - "ready for merge/deploy"
+      - "in staging/pre-prod"
+      - "in preprod"
+      - "master on staging"
+      - "master not on staging"
+      - "on staging pending qe"
+      - "on staging"
+      - "qe blocked"
+      - "in qe peer review"
+      - "ready for test"
+      - "ready for qe testing"

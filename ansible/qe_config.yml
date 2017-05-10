@@ -1,0 +1,12 @@
+- name: Create config.yaml for QE Environment
+  hosts: localhost
+
+  roles:
+    - splunk-jira
+
+  vars:
+    pws_id: 16699
+    saac_pws: saac_prod
+    qe_pws: qe
+    jira_pws: jira
+    app_environment: qe

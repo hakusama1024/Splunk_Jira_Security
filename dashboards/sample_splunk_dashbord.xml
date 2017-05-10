@@ -1,0 +1,636 @@
+<form>
+  <label>QE Defect Metrics v2</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="dropdown" token="bu_unit">
+      <default>*</default>
+      <label>Business Unit</label>
+      <choice value="*">All</choice>
+      <fieldForValue>business_unit</fieldForValue>
+      <search>
+        <query>(index="rax_temp_60" host="saac_dev_se_test_2")  | dedup business_unit | sort business_unit | top 10 business_unit | fields business_unit | table business_unit</query>
+      </search>
+      <fieldForLabel>business_unit</fieldForLabel>
+    </input>
+    <input type="dropdown" token="proj_name">
+      <default>*</default>
+      <label>Project</label>
+      <choice value="*">All</choice>
+      <fieldForValue>project_name</fieldForValue>
+      <search>
+        <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND  business_unit="$bu_unit$"  | dedup project_name | sort project_name | fields project_name | table project_name</query>
+      </search>
+    </input>
+    <input type="time" token="time_range" searchWhenChanged="true">
+      <label>Time Range</label>
+      <default>
+        <earliest>0</earliest>
+        <latest></latest>
+      </default>
+      <change>
+        <eval token="latest">if($latest$ == "now", "", $latest$)</eval>
+      </change>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Current Defect SDLC Phase Distribution</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+ | dedup key
+ | stats count by "sdlc_phase" | eval n_status=lower('sdlc_phase') | eval sort_field=case(n_status=="new",1,n_status=="analyze",2,n_status=="develop",3,n_status=="test",4,n_status=="deploy",5,n_status=="closed",6) | sort sort_field | fields - n_status</query>
+          <earliest></earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.showPercent">true</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"New":0xFF0000, "Analyze":0xF87217, "Develop":0xFFFF00, "Test": 0xFF00FF, "Deploy":0x0000FF, "Closed":0x009900}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Defect SDLC Phase Distribution Trends</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$") | timechart span=1w count(age) by sdlc_phase</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">In-Flight Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.text">Closed Defects</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.overlayFields">Closed</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked100</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"New":0xFF0000, "Analyze":0xF87217, "Develop":0xFFFF00, "Test": 0xFF00FF, "Deploy":0x0000FF, "Closed":0x009900}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.labels">[New,Analyze,Develop,Test,Deploy,Closed]</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Current Severity Distribution as a Function of Defect SDLC Phase</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+ | dedup key
+ | where 'sdlc_phase' != "Closed"
+ | chart count by "sdlc_phase", "severity" | eval n_status=lower('sdlc_phase') | eval sort_field=case(n_status=="new",1,n_status=="analyze",2,n_status=="develop",3,n_status=="test",4,n_status=="deploy",5,n_status=="closed",6) | sort sort_field | fields - n_status sort_field</query>
+          <earliest></earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"S0":0xFF0000,"S1":0xF87217,"S2":0xFFFF00,"S3":0x009900, null: #808080}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Severity Distribution Trends for Open Defects</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")| search sdlc_phase = "Develop"  | timechart  span=1w count by severity</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Number of Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"S0":0xFF0000,"S1":0xF87217,"S2":0xFFFF00,"S3":0x009900, null: #808080}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Average age Trends by Severity for Open Defects</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$") |  search sdlc_phase = "Develop"  | timechart span=1w avg(age) by severity</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Average age (days)</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"S0":0xFF0000,"S1":0xF87217,"S2":0xFFFF00,"S3":0x009900, null: #808080}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>When Detected Trends</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")| dedup key | `setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)` | timechart span=1w count by "when_detected"</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Number of Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"Component":0x009900, "Integration":0xFFFF00, "UAT":0xF87217, "Post-Release":0xFF0000}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.labels">[Component,Integration,UAT,Post-Release]</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Current Defect Type Distribution</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+ | dedup key
+ | stats count by "defect_type" | eval n_status=lower('defect_type') | eval sort_field=case(n_status=="functional",1,n_status=="security",2,n_status=="integration",3,n_status=="performance",4,n_status=="user experience",5,n_status=="other",6) | sort sort_field | fields - n_status</query>
+          <earliest></earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.showPercent">true</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"Functional":0x009900, "Security":0x0000FF, "Integration":0xFFFF00, "Performance":0xF87217, "User Experience":0xFF0000, "Other": 0x808080}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Defect Type Trends</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")| dedup key | `setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)` | timechart span=1w count by "defect_type"</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Number of Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.fieldColors">{"Functional":0x009900, "Security":0x0000FF, "Integration":0xFFFF00, "Performance":0xF87217, "User Experience":0xFF0000, "Other": 0x808080}</option>
+        <option name="charting.legend.labels">["Functional","Security","Integration","Performance","User Experience", "Other"]</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Overall Defect Detection and Closure Trends</title>
+      <chart>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+| dedup key
+| reverse
+| eval resolvedIssueQ = if(resolution != "Unresolved" AND resolution != "Approved", 1, 0)
+| `setsorttime(resolved, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, resolvedIssueQ, Resolved
+| append [search index="rax_temp_60" host="saac_dev_se_test_2" AND business_unit="$bu_unit$" AND project_name="$proj_name$"
+| dedup key
+| reverse 
+| eval createdIssueQ = if(isnotnull(created), 1, 0)
+| `setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, createdIssueQ, created]
+| timechart span=1week sum(createdIssueQ) as createdSum, list(created) as createdDates, sum(resolvedIssueQ) as resolvedSum, list(Resolved) as resolvedDates
+| streamstats sum(createdSum) as "created (aggregate)", sum(resolvedSum) as "Closed (aggregate)"
+| rename createdSum as "created (weekly)", resolvedSum as "Closed (weekly)"
+| fields - createdDates, resolvedDates</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Week</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Weekly Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.text">Aggregate Defects</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">"created (aggregate)","Closed (aggregate)"</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"created (weekly)":0x3d3d5c,"Closed (weekly)":0x808080,"created (aggregate)":0xFF0000,"Closed (aggregate)":0x009900}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.labels">["created (weekly)","Closed (weekly)","created (aggregate)","Closed (aggregate)"]</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>S0 Severity Defect Detection and Closure Trends</title>
+      <chart>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+| dedup key
+| reverse
+| eval resolvedIssueQ = if(resolution != "Unresolved" AND resolution != "Approved" AND severity = "S0", 1, 0)
+| `setsorttime(resolved, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, resolvedIssueQ, Resolved
+| append [search index="rax_temp_60" host="saac_dev_se_test_2" AND business_unit="$bu_unit$" AND project_name="$proj_name$"
+| dedup key
+| reverse 
+| eval createdIssueQ = if(isnotnull(created) AND severity = "S0", 1, 0)
+| `setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, createdIssueQ, created]
+| timechart span=1week sum(createdIssueQ) as createdSum, list(created) as createdDates, sum(resolvedIssueQ) as resolvedSum, list(Resolved) as resolvedDates
+| streamstats sum(createdSum) as "created (aggregate)", sum(resolvedSum) as "Closed (aggregate)"
+| rename createdSum as "created (weekly)", resolvedSum as "Closed (weekly)"
+| fields - createdDates, resolvedDates</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Week</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Weekly Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.text">Aggregate Defects</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">"created (aggregate)","Closed (aggregate)"</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"created (weekly)":0x3d3d5c,"Closed (weekly)":0x808080,"created (aggregate)":0xFF0000,"Closed (aggregate)":0x009900}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.labels">["created (weekly)","Closed (weekly)","created (aggregate)","Closed (aggregate)"]</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>S1 Severity Defect Detection and Closure Trends</title>
+      <chart>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+| dedup key
+| reverse
+| eval resolvedIssueQ = if(resolution != "Unresolved" AND resolution != "Approved" AND severity = "S1", 1, 0)
+| `setsorttime(resolved, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, resolvedIssueQ, Resolved
+| append [search index="rax_temp_60" host="saac_dev_se_test_2" AND business_unit="$bu_unit$" AND project_name="$proj_name$"
+| dedup key
+| reverse 
+| eval createdIssueQ = if(isnotnull(created) AND severity = "S1", 1, 0)
+| `setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, createdIssueQ, created]
+| timechart span=1week sum(createdIssueQ) as createdSum, list(created) as createdDates, sum(resolvedIssueQ) as resolvedSum, list(Resolved) as resolvedDates
+| streamstats sum(createdSum) as "created (aggregate)", sum(resolvedSum) as "Closed (aggregate)"
+| rename createdSum as "created (weekly)", resolvedSum as "Closed (weekly)"
+| fields - createdDates, resolvedDates</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Week</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Weekly Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.text">Aggregate Defects</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">"created (aggregate)","Closed (aggregate)"</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"created (weekly)":0x3d3d5c,"Closed (weekly)":0x808080,"created (aggregate)":0xFF0000,"Closed (aggregate)":0x009900}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.labels">["created (weekly)","Closed (weekly)","created (aggregate)","Closed (aggregate)"]</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>S2 Severity Defect Detection and Closure Trends</title>
+      <chart>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+| dedup key
+| reverse
+| eval resolvedIssueQ = if(resolution != "Unresolved" AND resolution != "Approved" AND severity = "S2", 1, 0)
+| `setsorttime(resolved, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, resolvedIssueQ, Resolved
+| append [search index="rax_temp_60" host="saac_dev_se_test_2" AND business_unit="$bu_unit$" AND project_name="$proj_name$"
+| dedup key
+| reverse 
+| eval createdIssueQ = if(isnotnull(created) AND severity = "S2", 1, 0)
+| `setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, createdIssueQ, created]
+| timechart span=1week sum(createdIssueQ) as createdSum, list(created) as createdDates, sum(resolvedIssueQ) as resolvedSum, list(Resolved) as resolvedDates
+| streamstats sum(createdSum) as "created (aggregate)", sum(resolvedSum) as "Closed (aggregate)"
+| rename createdSum as "created (weekly)", resolvedSum as "Closed (weekly)"
+| fields - createdDates, resolvedDates</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Week</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Weekly Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.text">Aggregate Defects</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">"created (aggregate)","Closed (aggregate)"</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"created (weekly)":0x3d3d5c,"Closed (weekly)":0x808080,"created (aggregate)":0xFF0000,"Closed (aggregate)":0x009900}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.labels">["created (weekly)","Closed (weekly)","created (aggregate)","Closed (aggregate)"]</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>S3 Severity Defect Detection and Closure Trends</title>
+      <chart>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="$bu_unit$"  AND project_name="$proj_name$")
+| dedup key
+| reverse
+| eval resolvedIssueQ = if(resolution != "Unresolved" AND resolution != "Approved" AND severity = "S3", 1, 0)
+| `setsorttime(resolved, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, resolvedIssueQ, Resolved
+| append [search index="rax_temp_60" host="saac_dev_se_test_2" AND business_unit="$bu_unit$" AND project_name="$proj_name$"
+| dedup key
+| reverse 
+| eval createdIssueQ = if(isnotnull(created) AND severity = "S3", 1, 0)
+| `setsorttime(created, %Y-%m-%dT%H:%M:%S.000+0000)`
+| table _time, createdIssueQ, created]
+| timechart span=1week sum(createdIssueQ) as createdSum, list(created) as createdDates, sum(resolvedIssueQ) as resolvedSum, list(Resolved) as resolvedDates
+| streamstats sum(createdSum) as "created (aggregate)", sum(resolvedSum) as "Closed (aggregate)"
+| rename createdSum as "created (weekly)", resolvedSum as "Closed (weekly)"
+| fields - createdDates, resolvedDates</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.axisTitleX.text">Week</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Weekly Defects</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.text">Aggregate Defects</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">"created (aggregate)","Closed (aggregate)"</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"created (weekly)":0x3d3d5c,"Closed (weekly)":0x808080,"created (aggregate)":0xFF0000,"Closed (aggregate)":0x009900}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.labels">["created (weekly)","Closed (weekly)","created (aggregate)","Closed (aggregate)"]</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Defects Worked On By Developer</title>
+        <search>
+          <query>(index="rax_temp_60" host="saac_dev_se_test_2") AND (business_unit="*$bu_unit$"  AND project_name="$proj_name$")
+ | dedup key | where sdlc_phase != "New"
+ | chart count by "assignee", "severity"</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.fieldColors">{"S0":0xFF0000,"S1":0xF87217,"S2":0xFFFF00,"S3":0x009900, null: #808080}</option>
+      </chart>
+    </panel>
+  </row>
+</form>

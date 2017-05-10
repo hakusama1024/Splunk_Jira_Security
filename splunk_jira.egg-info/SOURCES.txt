@@ -1,0 +1,11 @@
+setup.py
+app/__init__.py
+app/__main__.py
+app/settings.py
+app/splunk_jira.py
+splunk_jira.egg-info/PKG-INFO
+splunk_jira.egg-info/SOURCES.txt
+splunk_jira.egg-info/dependency_links.txt
+splunk_jira.egg-info/entry_points.txt
+splunk_jira.egg-info/requires.txt
+splunk_jira.egg-info/top_level.txt

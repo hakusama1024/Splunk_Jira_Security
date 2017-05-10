@@ -1,0 +1,12 @@
+- name: Create config.yaml for SAAC Dev
+  hosts: localhost
+
+  roles:
+    - splunk-jira
+
+  vars:
+    pws_id: 16699
+    saac_pws: saac_dev
+    qe_pws: qe
+    jira_pws: jira
+    app_environment: saac
